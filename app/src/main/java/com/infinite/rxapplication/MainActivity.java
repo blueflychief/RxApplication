@@ -23,6 +23,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Predicate;
+import io.reactivex.subjects.BehaviorSubject;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -42,6 +43,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btTake).setOnClickListener(this);
         findViewById(R.id.btElementAt).setOnClickListener(this);
         findViewById(R.id.btCache).setOnClickListener(this);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                PublishSubject<Integer> publishSubject = PublishSubject.create();  //PublishSubject发送订阅后的事件给所有的observer
+//                ReplaySubject<Integer> publishSubject = ReplaySubject.create();  //ReplaySubject会缓存所有的事件给所有的observer
+//                ReplaySubject<Integer> publishSubject = ReplaySubject.createWithSize(2);  //ReplaySubject会缓存所有的事件给所有的observer，这里缓存两个
+                BehaviorSubject<Integer> publishSubject = BehaviorSubject.create();  //BehaviorSubject只发送订阅后的最后一个事件给所有的observer
+                publishSubject.onNext(1);
+                publishSubject.onNext(2);
+                publishSubject.onNext(3);
+                publishSubject.onNext(4);
+                publishSubject.onNext(5);
+
+                publishSubject.subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(@NonNull Integer integer) throws Exception {
+                        Log.i(TAG, "accept 1: " + integer);
+                    }
+                });
+                publishSubject.onNext(6);
+                publishSubject.onNext(7);
+                publishSubject.onNext(8);
+                publishSubject.onNext(9);
+
+                publishSubject.subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(@NonNull Integer integer) throws Exception {
+                        Log.i(TAG, "accept 2: " + integer);
+                    }
+                });
+                publishSubject.onNext(10);
+                publishSubject.onNext(11);
+                publishSubject.onNext(12);
+            }
+        }, 4000);
 
 
     }
