@@ -1,5 +1,6 @@
 package com.infinite.rxapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +23,9 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
+import io.reactivex.schedulers.Timed;
 import io.reactivex.subjects.BehaviorSubject;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -34,6 +37,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        findViewById(R.id.btJump).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, KotlinActivity.class));
+            }
+        });
+
         findViewById(R.id.btEmpty).setOnClickListener(this);
         findViewById(R.id.btDefer).setOnClickListener(this);
         findViewById(R.id.btBuffer).setOnClickListener(this);
@@ -43,7 +53,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btTake).setOnClickListener(this);
         findViewById(R.id.btElementAt).setOnClickListener(this);
         findViewById(R.id.btCache).setOnClickListener(this);
+        findViewById(R.id.btRetry).setOnClickListener(this);
+        findViewById(R.id.btTimestamp).setOnClickListener(this);
 
+
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                throw new IllegalArgumentException("产生了一个异常");
+//            }
+//        }, 5000);
+
+    }
+
+    private void subject() {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -79,13 +102,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 publishSubject.onNext(12);
             }
         }, 4000);
-
-
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.btTimestamp:
+                Observable.just(1, 2, 3, 4, 5, 6, 7, 8, 9)
+                        .timestamp()
+                        .subscribe(new Consumer<Timed<Integer>>() {
+                            @Override
+                            public void accept(@NonNull Timed<Integer> integerTimed) throws Exception {
+                                Log.i(TAG, "accept: " + integerTimed.value() + "------" + integerTimed.time());
+                            }
+                        });
+                break;
+            case R.id.btRetry:
+                Observable.just(1, 2, 3, 4, 5, 6, 7, 8)
+                        .map(new Function<Integer, Integer>() {
+                            @Override
+                            public Integer apply(@NonNull Integer integer) throws Exception {
+                                if (integer == 5) {
+                                    throw new IllegalArgumentException("IllegalArgumentException");
+                                }
+                                return integer;
+                            }
+                        })
+                        .retry(2)
+                        .subscribe(new Observer<Integer>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(Integer integer) {
+                                Log.i(TAG, "onNext: " + integer);
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                e.printStackTrace();
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+                break;
             case R.id.btCache:
                 //模拟三级缓存的数据
                 final String[] data = new String[]{"", "", ""};
