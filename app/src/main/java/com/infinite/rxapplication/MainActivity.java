@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                throw new IllegalArgumentException("产生了一个异常");
 //            }
 //        }, 5000);
+
+        HashMap hashMap;
 
     }
 
